@@ -11,14 +11,17 @@ use App\Http\Controllers\JadwalController;
 use App\Http\Controllers\AppointmentController;
 use App\Http\Controllers\FeedbackController;
 
-
 Route::get('/', function () {
+    return view('welcome');
+});
+
+Route::get('/dashboard', function () {
     $usersCount = \App\Models\User::count();
     $konselorsCount = \App\Models\Konselor::count();
     $jadwalsCount = \App\Models\Jadwal::count();
     $appointmentsCount = \App\Models\Appointment::count();
 
-    return view('welcome', compact('usersCount', 'konselorsCount', 'jadwalsCount', 'appointmentsCount'));
+    return view('dashboard', compact('usersCount', 'konselorsCount', 'jadwalsCount', 'appointmentsCount'));
 });
 
 Route::resource('users', UserController::class);
