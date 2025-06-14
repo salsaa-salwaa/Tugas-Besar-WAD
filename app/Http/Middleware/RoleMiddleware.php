@@ -1,31 +1,39 @@
-<?php // HARUS DI BARIS PERTAMA DAN KOLOM PERTAMA
+<?php
 
 namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Symfony\Component\HttpFoundation\Response;
 
 class RoleMiddleware
 {
     /**
-     * Tangani permintaan yang masuk.
+     * Handle an incoming request.
      *
-     * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
+     * @param  \Illuminate\Http\Request  $request
+     * @param  \Closure  $next
+     * @param  string  ...$roles  // PASTIKAN BAGIAN INI BENAR
+     * @return \Illuminate\Http\Response|\Illuminate\Http\RedirectResponse
      */
-    public function handle(Request $request, Closure $next, ...$roles): Response
+    public function handle(Request $request, Closure $next, ...$roles)
     {
         if (!Auth::check()) {
-            return redirect('/login');
+            return redirect('login');
         }
 
         $user = Auth::user();
 
-        if (!in_array($user->role, $roles)) {
-            return redirect('/dashboard')->with('error', 'Anda tidak memiliki izin untuk mengakses halaman ini.');
+        // Loop melalui semua role yang diizinkan untuk rute ini
+        foreach ($roles as $role) {
+            // Periksa apakah role pengguna cocok dengan salah satu role yang diizinkan
+            if ($user->role === $role) {
+                return $next($request); // Izinkan akses jika cocok
+            }
         }
 
-        return $next($request);
+        // Jika tidak ada role yang cocok, alihkan atau tolak akses
+        // Anda bisa mengalihkan ke dashboard dengan pesan error, atau menampilkan halaman 403
+        return redirect('/dashboard')->with('error', 'Anda tidak memiliki hak akses untuk halaman ini.');
     }
 }

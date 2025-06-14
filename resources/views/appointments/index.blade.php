@@ -3,9 +3,15 @@
 @section('content')
     <h1 class="mb-4">Daftar Appointment</h1>
 
-    <div class="text-end mb-3">
-        <a href="{{ route('appointments.create') }}" class="btn btn-primary">Tambah Appointment</a>
+    <div class="d-flex justify-content-between mb-3">
+        <div>
+            <a href="{{ route('dashboard') }}" class="btn btn-secondary">Kembali ke Dashboard</a>
+        </div>
+        <div>
+            <a href="{{ route('appointments.create') }}" class="btn btn-primary">Tambah Sesi</a>
+        </div>
     </div>
+
 
     <!-- Tabel Appointment -->
     <div class="table-responsive">

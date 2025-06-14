@@ -36,17 +36,11 @@ class AuthViewsController extends Controller
      */
     public function login(Request $request): RedirectResponse
     {
-        // DEBUG: Cek apakah metode login diakses
-        // dd('Metode login diakses.'); // Jangan aktifkan ini dulu, fokus pada register
-
         // Validasi input login
         $credentials = $request->validate([
             'username' => ['required', 'string'],
             'password' => ['required', 'string'],
         ]);
-
-        // DEBUG: Cek kredensial yang diterima
-        // dd('Kredensial yang diterima untuk login:', $credentials); // Aktifkan ini setelah register berhasil
 
         $authenticated = false;
 
@@ -59,9 +53,6 @@ class AuthViewsController extends Controller
         if (!$authenticated && Auth::attempt(['email' => $credentials['username'], 'password' => $credentials['password']], $request->boolean('remember'))) {
             $authenticated = true;
         }
-
-        // DEBUG: Cek apakah autentikasi berhasil
-        // dd('Status autentikasi setelah attempt:', $authenticated, 'User yang terotentikasi:', Auth::user()); // Aktifkan ini setelah register berhasil
 
         if ($authenticated) {
             $request->session()->regenerate();
@@ -80,21 +71,14 @@ class AuthViewsController extends Controller
      */
     public function register(Request $request): RedirectResponse
     {
-        // DEBUG: SANGAT PENTING - Cek apakah metode register diakses sama sekali
-        // dd('Metode register diakses. Request data:', $request->all()); // Biarkan ini mati
-
         try {
             // 1. Validasi input
             $request->validate([
                 'nama' => ['required', 'string', 'max:255'],
                 'username' => ['required', 'string', 'max:255', 'unique:'.User::class],
-                'email' => ['required', 'string', 'email', 'max:255', 'unique:'.User::class],
-                'password' => ['required', 'confirmed', 'min:8'],
+                'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
+                'password' => ['required', 'confirmed', Rules\Password::defaults()],
             ]);
-
-            // DEBUG: Cek apakah validasi berhasil dan data siap dibuat
-            // dd('Validasi registrasi berhasil. Data yang akan dibuat:', $request->all());
-
 
             // 2. Buat pengguna baru
             $user = User::create([
@@ -105,25 +89,25 @@ class AuthViewsController extends Controller
                 'role' => 'mahasiswa', // Secara default, setiap pendaftar baru adalah 'mahasiswa'
             ]);
 
-            // DEBUG: Cek apakah objek user berhasil dibuat
-            dd('User berhasil dibuat di database:', $user); // AKTIFKAN DEBUG INI SEKARANG
+            // MENGHAPUS BARIS DEBUG 'dd'
+            // Baris "dd('User berhasil dibuat di database:', $user);" yang menyebabkan layar hitam sudah dihapus dari sini.
 
-            // 3. Trigger event Registered (opsional, tapi bagus untuk konsistensi)
+            // 3. Trigger event Registered
             event(new Registered($user));
 
             // 4. Login pengguna setelah registrasi berhasil
             Auth::login($user);
 
-            // 5. Redirect ke dashboard atau halaman yang sesuai
+            // 5. Redirect ke dashboard yang sesuai
             return $this->redirectBasedOnRole(Auth::user());
 
         } catch (ValidationException $e) {
-            // DEBUG: Jika ada error validasi, tampilkan error
-            // dd('Error Validasi Registrasi:', $e->errors());
+            // Jika validasi gagal, kembali ke halaman sebelumnya dengan error
             return back()->withErrors($e->errors())->withInput();
         } catch (\Exception $e) {
-            // DEBUG: Tangani error lain yang mungkin terjadi saat menyimpan ke database
-            dd('Terjadi error umum saat registrasi:', $e->getMessage(), $e->getTrace()); // AKTIFKAN DEBUG INI
+            // Tangani error lain yang mungkin terjadi saat menyimpan ke database
+            // Log error untuk investigasi nanti
+            \Illuminate\Support\Facades\Log::error('Registration Error: '.$e->getMessage());
             return back()->withErrors(['general' => 'Terjadi kesalahan saat registrasi. Silakan coba lagi.'])->withInput();
         }
     }
@@ -137,9 +121,13 @@ class AuthViewsController extends Controller
     {
         if ($user->role === 'admin') {
             return redirect()->route('admin.dashboard');
-        } elseif ($user->role === 'mahasiswa') {
+        }
+        
+        if ($user->role === 'mahasiswa') {
             return redirect()->route('mahasiswa.dashboard');
         }
+
+        // Fallback
         return redirect()->intended(route('dashboard'));
     }
 

@@ -4,9 +4,15 @@
     <h1 class="mb-4">Daftar Konselor</h1>
 
     <!-- Tombol Add di sebelah kanan -->
-    <div class="text-end mb-3">
-        <a href="{{ route('konselors.create') }}" class="btn btn-primary">Tambah Konselor</a>
+    <div class="d-flex justify-content-between mb-3">
+        <div>
+            <a href="{{ route('dashboard') }}" class="btn btn-secondary">Kembali ke Dashboard</a>
+        </div>
+        <div>
+            <a href="{{ route('konselors.create') }}" class="btn btn-primary">Tambah Konselor</a>
+        </div>
     </div>
+
 
     <!-- Tabel Konselor -->
     <div class="table-responsive">
