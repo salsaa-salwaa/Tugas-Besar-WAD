@@ -4,9 +4,15 @@
     <h1 class="mb-4">Daftar Users</h1>
 
     <!-- Tombol Add di sebelah kanan -->
-    <div class="text-end mb-3">
-        <a href="{{ route('users.create') }}" class="btn btn-primary">Tambah User</a>
+    <div class="d-flex justify-content-between mb-3">
+        <div>
+            <a href="{{ route('dashboard') }}" class="btn btn-secondary">Kembali ke Dashboard</a>
+        </div>
+        <div>
+            <a href="{{ route('users.create') }}" class="btn btn-primary">Tambah User</a>
+        </div>
     </div>
+
 
     <!-- Tabel Users -->
     <div class="table-responsive">

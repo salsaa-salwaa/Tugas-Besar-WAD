@@ -34,7 +34,6 @@
             <input type="password" class="form-control" id="password" name="password">
         </div>
 
-        <!-- Tombol Submit di Sebelah Kanan -->
         <div class="d-flex justify-content-end">
             <button type="submit" class="btn btn-primary">Simpan</button>
         </div>

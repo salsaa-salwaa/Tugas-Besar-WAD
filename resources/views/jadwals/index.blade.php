@@ -3,8 +3,13 @@
 @section('content')
     <h1 class="mb-4">Daftar Jadwal</h1>
 
-    <div class="text-end mb-3">
-        <a href="{{ route('jadwals.create') }}" class="btn btn-primary">Tambah Jadwal</a>
+    <div class="d-flex justify-content-between mb-3">
+        <div>
+            <a href="{{ route('dashboard') }}" class="btn btn-secondary">Kembali ke Dashboard</a>
+        </div>
+        <div>
+            <a href="{{ route('jadwals.create') }}" class="btn btn-primary">Tambah Jadwal</a>
+        </div>
     </div>
 
     <!-- Tabel Jadwal -->
