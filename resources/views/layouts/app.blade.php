@@ -19,6 +19,10 @@
 
             <div class="collapse navbar-collapse" id="navbarNavDropdown">
                 <ul class="navbar-nav ms-auto">
+                    {{-- Menu Login --}}
+                    <li class="nav-item">
+                        <a class="nav-link {{ request()->is('dashboard') ? 'active fw-semibold text-warning' : '' }}" href="{{ url('/login') }}">Login</a>
+                    </li>                    
                     {{-- Menu Dashboard --}}
                     <li class="nav-item">
                         <a class="nav-link {{ request()->is('dashboard') ? 'active fw-semibold text-warning' : '' }}" href="{{ url('/dashboard') }}">Dashboard</a>
