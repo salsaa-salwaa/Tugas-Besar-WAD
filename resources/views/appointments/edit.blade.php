@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-    <h1 class="mb-4">Edit Appointment</h1>
+    <h1 class="mb-4">Edit Sesi</h1>
 
     <form action="{{ route('appointments.update', $appointment->id_appointment) }}" method="POST">
         @csrf
@@ -40,6 +40,6 @@
             <textarea class="form-control" name="deskripsi" id="deskripsi" rows="3">{{ $appointment->deskripsi }}</textarea>
         </div>
 
-        <button type="submit" class="btn btn-warning">Update Appointment</button>
+        <button type="submit" class="btn btn-warning">Update Sesi</button>
     </form>
 @endsection
