@@ -1,44 +1,109 @@
 @extends('layouts.app')
 
 @section('content')
-    <h1 class="mb-4">Tambah Appointment</h1>
+<div class="container">
+    <h1 class="h4 mb-3">Buat Janji Temu Baru</h1>
 
-    <form action="{{ route('appointments.store') }}" method="POST">
-        @csrf
+    <a href="{{ route('appointments.index') }}" class="btn btn-secondary mb-3">← Kembali ke Daftar</a>
 
-        <div class="mb-3">
-            <label for="mahasiswa_id" class="form-label">Pilih Mahasiswa</label>
-            <select class="form-select" name="mahasiswa_id" id="mahasiswa_id" required>
-                <option value="" disabled selected>Pilih Mahasiswa</option>
-                @foreach($mahasiswa as $mhs)
-                    <option value="{{ $mhs->id_user }}">{{ $mhs->nama }}</option>
+    {{-- Flash message untuk error dan success --}}
+    @if (session('error'))
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            {{ session('error') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    @endif
+
+    @if (session('success'))
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            {{ session('success') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    @endif
+
+    {{-- Error dari validasi --}}
+    @if ($errors->any())
+        <div class="alert alert-danger">
+            <ul class="mb-0">
+                @foreach ($errors->all() as $error)
+                    <li>{{ $error }}</li>
                 @endforeach
-            </select>
+            </ul>
         </div>
+    @endif
 
-        <div class="mb-3">
-            <label for="tipe" class="form-label">Pilih Tipe</label>
-            <select class="form-select" name="tipe" id="tipe" required>
-                <option value="daring">Daring</option>
-                <option value="luring">Luring</option>
-            </select>
+    <div class="card">
+        <div class="card-body">
+            <form method="POST" action="{{ route('appointments.store') }}">
+                @csrf
+
+                <div class="mb-3">
+                    <label for="tanggal" class="form-label">Tanggal Konsultasi</label>
+                    <input type="date" name="tanggal" id="tanggal" class="form-control" required>
+                    <small class="text-muted">* Hanya hari kerja (Senin – Jumat)</small>
+                </div>
+
+                <div class="mb-3">
+                    <label for="jadwal_id" class="form-label">Pilih Jadwal Konselor</label>
+                    <select name="jadwal_id" id="jadwal_id" class="form-select" required>
+                        <option value="" disabled selected>Pilih jadwal...</option>
+                        @foreach($jadwals as $jadwal)
+                            <option value="{{ $jadwal->id_jadwal }}">
+                                {{ $jadwal->konselor->nama }} - {{ $jadwal->hari }} ({{ \Carbon\Carbon::parse($jadwal->waktu)->format('H:i') }})
+                            </option>
+                        @endforeach
+                    </select>
+                    <small class="text-muted">* Jadwal akan difilter otomatis berdasarkan tanggal</small>
+                </div>
+
+                <div class="mb-3">
+                    <label for="tipe" class="form-label">Tipe Konsultasi</label>
+                    <select name="tipe" id="tipe" class="form-select" required>
+                        <option value="daring">Daring</option>
+                        <option value="luring">Luring</option>
+                    </select>
+                </div>
+
+                <div class="mb-3">
+                    <label for="deskripsi" class="form-label">Deskripsi Permasalahan (Opsional)</label>
+                    <textarea name="deskripsi" id="deskripsi" class="form-control" rows="3"></textarea>
+                </div>
+
+                <button type="submit" class="btn btn-primary">Ajukan Janji Temu</button>
+            </form>
         </div>
+    </div>
+</div>
 
-        <div class="mb-3">
-            <label for="jadwal_id" class="form-label">Pilih Jadwal</label>
-            <select class="form-select" name="jadwal_id" id="jadwal_id" required>
-                <option value="" disabled selected>Pilih Jadwal</option>
-                @foreach($jadwals as $jadwal)
-                    <option value="{{ $jadwal->id_jadwal }}">{{ $jadwal->hari }} - {{ $jadwal->waktu }}</option>
-                @endforeach
-            </select>
-        </div>
+{{-- Script untuk filter hari kerja dan filter jadwal berdasarkan hari --}}
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const tanggalInput = document.getElementById('tanggal');
+        const jadwalSelect = document.getElementById('jadwal_id');
+        const allOptions = Array.from(jadwalSelect.options);
 
-        <div class="mb-3">
-            <label for="deskripsi" class="form-label">Deskripsi (opsional)</label>
-            <textarea class="form-control" name="deskripsi" id="deskripsi" rows="3"></textarea>
-        </div>
+        tanggalInput.addEventListener('change', function () {
+            const selectedDate = new Date(this.value);
+            const day = selectedDate.getDay(); // 0 = Minggu, 6 = Sabtu
 
-        <button type="submit" class="btn btn-primary">Buat Appointment</button>
-    </form>
+            if (day === 0 || day === 6) {
+                alert('Silakan pilih tanggal pada hari kerja (Senin - Jumat)');
+                this.value = '';
+                jadwalSelect.innerHTML = '<option value="" disabled selected>Pilih jadwal...</option>';
+                return;
+            }
+
+            const hariIndo = ['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'];
+            const namaHari = hariIndo[day];
+
+            // Reset pilihan jadwal
+            jadwalSelect.innerHTML = '<option value="" disabled selected>Pilih jadwal...</option>';
+            allOptions.forEach(opt => {
+                if (opt.text.includes(namaHari)) {
+                    jadwalSelect.appendChild(opt);
+                }
+            });
+        });
+    });
+</script>
 @endsection

@@ -26,4 +26,9 @@ class Jadwal extends Model
     {
         return $this->hasMany(Appointment::class, 'jadwal_id', 'id_jadwal');
     }
+
+    public function jadwals()
+    {
+        return $this->hasMany(Jadwal::class, 'konselor_id', 'id_konselor');
+    }
 }

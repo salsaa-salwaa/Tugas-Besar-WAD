@@ -27,8 +27,10 @@
             <input type="checkbox" name="keahlian[]" value="self-development" {{ in_array('self-development', old('keahlian', json_decode($konselor->keahlian, true))) ? 'checked' : '' }}> Self Development<br>
         </div>
 
-        <div class="d-flex justify-content-end">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <a href="{{ url()->previous() }}" class="btn btn-secondary">&larr; Kembali</a>
             <button type="submit" class="btn btn-primary">Update</button>
         </div>
+
     </form>
 @endsection
