@@ -35,8 +35,8 @@
             <input type="password" class="form-control" id="password" name="password">
         </div>
 
-        <!-- Tombol Submit di Sebelah Kanan -->
-        <div class="d-flex justify-content-end">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <a href="{{ url()->previous() }}" class="btn btn-secondary">&larr; Kembali</a>
             <button type="submit" class="btn btn-primary">Update</button>
         </div>
     </form>

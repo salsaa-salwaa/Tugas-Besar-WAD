@@ -16,12 +16,18 @@
                     </div>
 
                     <div class="list-group">
+                        {{-- PENAMBAHAN LINK UNTUK MELIHAT JADWAL --}}
+                        <a href="{{ route('jadwals.index') }}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                            Lihat Jadwal Konseling
+                            <span class="badge bg-primary rounded-pill">></span>
+                        </a>
+
                         <a href="{{ route('appointments.index') }}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
-                            Lihat Janji Temu Saya
+                            Lihat Sesi Saya
                             <span class="badge bg-primary rounded-pill">></span>
                         </a>
                         <a href="{{ route('appointments.create') }}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
-                            Buat Janji Temu Baru
+                            Buat Sesi Baru
                             <span class="badge bg-primary rounded-pill">></span>
                         </a>
                         <a href="{{ route('feedback.create') }}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">

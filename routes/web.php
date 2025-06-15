@@ -2,6 +2,13 @@
 
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
+use App\Http\Controllers\AuthViewsController;
+use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\AppointmentController;
+use App\Http\Controllers\FeedbackController;
+use App\Http\Controllers\JadwalController;
+use App\Http\Controllers\UserController;
+use App\Http\Controllers\KonselorController;
 
 /*
 |--------------------------------------------------------------------------
@@ -10,20 +17,22 @@ use Illuminate\Support\Facades\Auth;
 */
 
 // --- RUTE PUBLIK ---
-Route::get('/', function () {
-    return view('welcome');
-});
+Route::get('/', function () { return view('welcome'); });
 
 // --- RUTE AUTENTIKASI ---
-Route::get('login', [\App\Http\Controllers\AuthViewsController::class, 'showLoginForm'])->name('login');
-Route::get('register', [\App\Http\Controllers\AuthViewsController::class, 'showRegisterForm'])->name('register');
-Route::post('login', [\App\Http\Controllers\AuthViewsController::class, 'login']);
-Route::post('register', [\App\Http\Controllers\AuthViewsController::class, 'register']);
-Route::post('logout', [\App\Http\Controllers\AuthViewsController::class, 'logout'])->name('logout');
+Route::get('login', [AuthViewsController::class, 'showLoginForm'])->name('login');
+Route::get('register', [AuthViewsController::class, 'showRegisterForm'])->name('register');
+Route::post('login', [AuthViewsController::class, 'login']);
+Route::post('register', [AuthViewsController::class, 'register']);
+Route::post('logout', [AuthViewsController::class, 'logout'])->name('logout');
 
+// =========================================================================
+//  PERBAIKAN UTAMA ADA PADA STRUKTUR DI BAWAH INI
+// =========================================================================
 
-// --- RUTE YANG MEMBUTUHKAN LOGIN (UMUM) ---
+// --- RUTE YANG BISA DIAKSES SEMUA PERAN (SETELAH LOGIN) ---
 Route::middleware('auth')->group(function () {
+
     // Dashboard utama (pengalih peran)
     Route::get('/dashboard', function () {
         if (Auth::user()->role === 'admin') {
@@ -33,20 +42,15 @@ Route::middleware('auth')->group(function () {
     })->name('dashboard');
 
     // Rute Profil
-    Route::get('/profile', [\App\Http\Controllers\ProfileController::class, 'edit'])->name('profile.edit');
-    Route::patch('/profile', [\App\Http\Controllers\ProfileController::class, 'update'])->name('profile.update');
-    Route::delete('/profile', [\App\Http\Controllers\ProfileController::class, 'destroy'])->name('profile.destroy');
-    
-    // Rute-rute ini dapat diakses oleh SEMUA PERAN yang sudah login.
-    // Logika untuk menampilkan data (semua vs milik sendiri) harus ditangani di dalam Controller.
-    Route::get('/appointments', [\App\Http\Controllers\AppointmentController::class, 'index'])->name('appointments.index');
-    Route::get('/feedback', [\App\Http\Controllers\FeedbackController::class, 'index'])->name('feedback.index');
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
-    // PENAMBAHAN RUTE EDIT DAN UPDATE YANG HILANG
-    Route::get('/appointments/{appointment}/edit', [\App\Http\Controllers\AppointmentController::class, 'edit'])->name('appointments.edit');
-    Route::put('/appointments/{appointment}', [\App\Http\Controllers\AppointmentController::class, 'update'])->name('appointments.update');
+    // Rute umum yang bisa dilihat semua peran
+    Route::get('/appointments', [AppointmentController::class, 'index'])->name('appointments.index');
+    Route::get('/feedback', [FeedbackController::class, 'index'])->name('feedback.index');
+    Route::get('/jadwals', [JadwalController::class, 'index'])->name('jadwals.index');
 });
-
 
 // --- RUTE KHUSUS MAHASISWA ---
 Route::middleware(['auth', 'role:mahasiswa'])->group(function () {
@@ -54,14 +58,17 @@ Route::middleware(['auth', 'role:mahasiswa'])->group(function () {
         return view('mahasiswa.dashboard');
     })->name('mahasiswa.dashboard');
 
-    // Aksi yang hanya bisa dilakukan Mahasiswa
-    Route::get('/appointments/create', [\App\Http\Controllers\AppointmentController::class, 'create'])->name('appointments.create');
-    Route::post('/appointments', [\App\Http\Controllers\AppointmentController::class, 'store'])->name('appointments.store');
-    
-    Route::get('/feedback/create', [\App\Http\Controllers\FeedbackController::class, 'create'])->name('feedback.create');
-    Route::post('/feedback', [\App\Http\Controllers\FeedbackController::class, 'store'])->name('feedback.store');
-});
+    // Appointment
+    Route::get('/appointments/create', [AppointmentController::class, 'create'])->name('appointments.create');
+    Route::post('/appointments', [AppointmentController::class, 'store'])->name('appointments.store');
+    Route::get('/appointments/{appointment}/edit', [AppointmentController::class, 'edit'])->name('appointments.edit');
+    Route::put('/appointments/{appointment}', [AppointmentController::class, 'update'])->name('appointments.update');
+    Route::delete('/appointments/{id}/cancel', [AppointmentController::class, 'cancel'])->name('appointments.cancel');
 
+    // Feedback
+    Route::get('/feedback/create', [FeedbackController::class, 'create'])->name('feedback.create');
+    Route::post('/feedback', [FeedbackController::class, 'store'])->name('feedback.store');
+});
 
 // --- RUTE KHUSUS ADMIN ---
 Route::middleware(['auth', 'role:admin'])->group(function () {
@@ -75,12 +82,14 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
         ]);
     })->name('admin.dashboard');
 
-    // Resource management yang hanya bisa dilakukan Admin
-    Route::resource('users', \App\Http\Controllers\UserController::class)->except(['index']); // index sudah umum
-    Route::resource('konselors', \App\Http\Controllers\KonselorController::class);
-    Route::resource('jadwals', \App\Http\Controllers\JadwalController::class);
+    // Admin resource management
+    Route::resource('users', UserController::class);
+    Route::resource('konselors', KonselorController::class);
+    Route::resource('jadwals', JadwalController::class)->except(['index']); // index dibuka untuk semua
 
-    // Aksi spesifik Admin pada resource yang dibagi
-    Route::delete('/appointments/{appointment}', [\App\Http\Controllers\AppointmentController::class, 'destroy'])->name('appointments.destroy');
-    Route::delete('/feedback/{feedback}', [\App\Http\Controllers\FeedbackController::class, 'destroy'])->name('feedback.destroy');
+    // Admin actions on appointments & feedback
+    Route::delete('/appointments/{appointment}', [AppointmentController::class, 'destroy'])->name('appointments.destroy');
+    Route::post('/appointments/{id}/acc', [AppointmentController::class, 'acc'])->name('appointments.acc');
+
+    Route::delete('/feedback/{feedback}', [FeedbackController::class, 'destroy'])->name('feedback.destroy');
 });

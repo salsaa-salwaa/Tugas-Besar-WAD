@@ -14,9 +14,20 @@ class FeedbackController extends Controller
      */
     public function index()
     {
-        $feedbacks = Feedback::with(['mahasiswa', 'konselor'])->latest()->get();
+        if (Auth::user()->role === 'admin') {
+            // Admin bisa melihat semua feedback
+            $feedbacks = Feedback::with(['mahasiswa', 'konselor'])->latest()->get();
+        } else {
+            // Mahasiswa hanya melihat feedback yang dia buat sendiri
+            $feedbacks = Feedback::with(['mahasiswa', 'konselor'])
+                ->where('mahasiswa_id', Auth::user()->id_user)
+                ->latest()
+                ->get();
+        }
+
         return view('feedback.index', compact('feedbacks'));
     }
+
 
     /**
      * Tampilkan form untuk mengisi feedback.

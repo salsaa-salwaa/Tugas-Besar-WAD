@@ -2,19 +2,19 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Appointment extends Model
 {
-    use HasFactory;
-
-    protected $table = 'appointments';
-
     protected $primaryKey = 'id_appointment';
 
     protected $fillable = [
-        'mahasiswa_id', 'jadwal_id', 'deskripsi', 'tipe'
+        'mahasiswa_id',
+        'jadwal_id',
+        'tanggal',
+        'deskripsi',
+        'tipe',
+        'status',
     ];
 
     public function mahasiswa()

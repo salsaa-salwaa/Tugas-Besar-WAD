@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\Rule;
 
 class UserController extends Controller
 {
@@ -31,12 +33,12 @@ class UserController extends Controller
         User::create([
             'nama' => $request->nama,
             'username' => $request->username,
-            'password' => bcrypt($request->password),
+            'password' => Hash::make($request->password),
             'role' => $request->role,
             'email' => $request->email,
         ]);
 
-        return redirect()->route('users.index');
+        return redirect()->route('users.index')->with('success', 'User berhasil ditambahkan.');
     }
 
     public function edit(User $user)
@@ -47,27 +49,27 @@ class UserController extends Controller
     public function update(Request $request, User $user)
     {
         $request->validate([
-            'nama' => 'required|string|max:255',
-            'username' => 'required|string|max:255|unique:users,username,' . $user->id_user, 
-            'password' => 'nullable|string|min:6',
-            'role' => 'required|in:admin,mahasiswa',
-            'email' => 'required|string|email|max:255|unique:users,email,' . $user->id_user, 
+            'nama' => ['required', 'string', 'max:255'],
+            // PERBAIKAN: Menambahkan nama kolom primary key ('id_user') pada aturan unique
+            'username' => ['required', 'string', 'max:255', Rule::unique('users', 'username')->ignore($user->id_user, 'id_user')],
+            'email' => ['required', 'string', 'email', 'max:255', Rule::unique('users', 'email')->ignore($user->id_user, 'id_user')],
+            'password' => ['nullable', 'string', 'min:6'],
+            'role' => ['required', 'in:admin,mahasiswa'],
         ]);
 
-        $user->update([
-            'nama' => $request->nama,
-            'username' => $request->username,
-            'password' => $request->password ? bcrypt($request->password) : $user->password,
-            'role' => $request->role,
-            'email' => $request->email,
-        ]);
+        $userData = $request->only(['nama', 'username', 'email', 'role']);
+        if ($request->filled('password')) {
+            $userData['password'] = Hash::make($request->password);
+        }
 
-        return redirect()->route('users.index');
+        $user->update($userData);
+
+        return redirect()->route('users.index')->with('success', 'User berhasil diperbarui.');
     }
 
     public function destroy(User $user)
     {
         $user->delete();
-        return redirect()->route('users.index');
+        return redirect()->route('users.index')->with('success', 'User berhasil dihapus.');
     }
 }
