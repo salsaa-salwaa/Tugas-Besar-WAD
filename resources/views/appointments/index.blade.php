@@ -45,7 +45,7 @@
                         @forelse($appointments as $appointment)
                             <tr>
                                 @if (Auth::user()->role === 'admin')
-                                    <td>{{ $appointment->mahasiswa->name ?? '-' }}</td>
+                                    <td>{{ $appointment->mahasiswa->nama ?? '-' }}</td>
                                 @endif
                                 <td>{{ $appointment->jadwal->konselor->nama ?? '-' }}</td>
                                 <td>{{ $appointment->jadwal->hari ?? '-' }}</td>
