@@ -3,7 +3,7 @@
 @section('content')
 <div class="container">
     {{-- Judul Halaman --}}
-    <h1 class="h4 mb-3">Daftar Sesi Janji Temu</h1>
+    <h1 class="h4 mb-3">Daftar Sesi Saya</h1>
 
     {{-- Tombol Aksi di bawah judul --}}
     <div class="mb-4">

@@ -38,7 +38,7 @@
                 {{-- Pilih Jadwal Hari dan Jam --}}
                 <div class="mb-3">
                     <label class="form-label">Pilih Jadwal Hari dan Jam</label>
-                    @foreach(['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu'] as $day)
+                    @foreach(['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat'] as $day)
                         <div class="mb-3 p-3 border rounded">
                             <label class="form-label fw-bold">{{ $day }}</label>
                             <select name="jadwal[{{ $day }}][]" class="form-select" multiple size="5">

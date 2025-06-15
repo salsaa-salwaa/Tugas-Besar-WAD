@@ -19,13 +19,9 @@ Route::post('login', [\App\Http\Controllers\AuthViewsController::class, 'login']
 Route::post('register', [\App\Http\Controllers\AuthViewsController::class, 'register']);
 Route::post('logout', [\App\Http\Controllers\AuthViewsController::class, 'logout'])->name('logout');
 
-// =========================================================================
-//  PERBAIKAN UTAMA ADA PADA STRUKTUR DI BAWAH INI
-// =========================================================================
 
 // --- RUTE YANG BISA DIAKSES SEMUA PERAN (SETELAH LOGIN) ---
 Route::middleware('auth')->group(function () {
-    // Dashboard utama (pengalih peran)
     Route::get('/dashboard', function () {
         if (Auth::user()->role === 'admin') {
             return redirect()->route('admin.dashboard');
@@ -33,7 +29,6 @@ Route::middleware('auth')->group(function () {
         return redirect()->route('mahasiswa.dashboard');
     })->name('dashboard');
 
-    // Rute Profil
     Route::get('/profile', [\App\Http\Controllers\ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [\App\Http\Controllers\ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [\App\Http\Controllers\ProfileController::class, 'destroy'])->name('profile.destroy');
@@ -41,7 +36,12 @@ Route::middleware('auth')->group(function () {
     // Rute yang bisa diakses SEMUA PERAN untuk melihat daftar
     Route::get('/appointments', [\App\Http\Controllers\AppointmentController::class, 'index'])->name('appointments.index');
     Route::get('/feedback', [\App\Http\Controllers\FeedbackController::class, 'index'])->name('feedback.index');
-    Route::get('/jadwals', [\App\Http\Controllers\JadwalController::class, 'index'])->name('jadwals.index'); // <-- Mahasiswa bisa mengakses ini
+    Route::get('/jadwals', [\App\Http\Controllers\JadwalController::class, 'index'])->name('jadwals.index');
+    
+    // PERBAIKAN: Rute Edit & Update Sesi sekarang bisa diakses semua peran.
+    // Izin akses akan dicek di dalam Controller.
+    Route::get('/appointments/{appointment}/edit', [\App\Http\Controllers\AppointmentController::class, 'edit'])->name('appointments.edit');
+    Route::put('/appointments/{appointment}', [\App\Http\Controllers\AppointmentController::class, 'update'])->name('appointments.update');
 });
 
 
@@ -49,11 +49,9 @@ Route::middleware('auth')->group(function () {
 Route::middleware(['auth', 'role:mahasiswa'])->group(function () {
     Route::get('/mahasiswa/dashboard', function () { return view('mahasiswa.dashboard'); })->name('mahasiswa.dashboard');
 
-    // Aksi yang hanya bisa dilakukan Mahasiswa
+    // Mahasiswa hanya bisa membuat sesi baru.
     Route::get('/appointments/create', [\App\Http\Controllers\AppointmentController::class, 'create'])->name('appointments.create');
     Route::post('/appointments', [\App\Http\Controllers\AppointmentController::class, 'store'])->name('appointments.store');
-    Route::get('/appointments/{appointment}/edit', [\App\Http\Controllers\AppointmentController::class, 'edit'])->name('appointments.edit');
-    Route::put('/appointments/{appointment}', [\App\Http\Controllers\AppointmentController::class, 'update'])->name('appointments.update');
     
     Route::get('/feedback/create', [\App\Http\Controllers\FeedbackController::class, 'create'])->name('feedback.create');
     Route::post('/feedback', [\App\Http\Controllers\FeedbackController::class, 'store'])->name('feedback.store');
@@ -72,13 +70,11 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
         ]);
     })->name('admin.dashboard');
 
-    // Manajemen resource oleh Admin
     Route::resource('users', \App\Http\Controllers\UserController::class);
     Route::resource('konselors', \App\Http\Controllers\KonselorController::class);
-    // Admin bisa melakukan semua aksi pada Jadwal (create, edit, delete, dll)
-    Route::resource('jadwals', \App\Http\Controllers\JadwalController::class)->except(['index']); // Halaman index sudah umum
+    Route::resource('jadwals', \App\Http\Controllers\JadwalController::class)->except(['index']);
 
-    // Aksi hapus spesifik Admin
+    // Aksi hapus spesifik oleh Admin
     Route::delete('/appointments/{appointment}', [\App\Http\Controllers\AppointmentController::class, 'destroy'])->name('appointments.destroy');
     Route::delete('/feedback/{feedback}', [\App\Http\Controllers\FeedbackController::class, 'destroy'])->name('feedback.destroy');
 });
